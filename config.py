@@ -20,7 +20,6 @@ models = {
         'type': 'local',
         'filename': 'codellama-34b-instruct.Q4_K_M.gguf',
     },
-    'default': 'GitHub',
 }
-
-model_folder = os.path.expanduser('~/models')
+current_model = 'CodeLlama-7b'
+model_folder = '$DATA_ROOT/models'

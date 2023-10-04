@@ -8,7 +8,7 @@ from starlette.requests import Request
 import config
 
 app = applications.Starlette()
-state = config.models[config.models['default']]
+model_config = config.models[config.current_model]
 local_server_process = None
 logging.basicConfig(level=logging.DEBUG)
 
@@ -27,31 +27,31 @@ def start_local_server(model_filename):
 
 @app.route('/set_target', methods=['POST'])
 async def set_target(request: Request):
-    global state
+    global model_config
     response = await request.json()
     target = response['target']
     if target not in config.models:
         raise exceptions.HTTPException(
             status_code=400, detail=f'Invalid target: {target}')
 
-    state = config.models[target]
+    model_config = config.models[target]
     if config.models[target].get("type") == "local":
         start_local_server(os.path.join(
             config.model_folder, config.models[target]['filename']))
 
-    message = f'Target set to {state}'
+    message = f'Target set to {model_config}'
     return responses.JSONResponse({'message': message}, status_code=200)
 
 
 @app.route('/{path:path}', methods=['GET', 'POST', 'PUT', 'DELETE'])
 async def proxy(request: Request):
-    global state
+    global model_config
     path = request.url.path
-    logging.debug(f'Current state: {state}')
+    logging.debug(f'Current model_config: {model_config}')
 
-    if state['type'] == 'remote':
-        url = f"{state['domain']}{path}"
-    elif state['type'] == 'local':
+    if model_config['type'] == 'remote':
+        url = f"{model_config['domain']}{path}"
+    elif model_config['type'] == 'local':
         url = f"http://localhost:8000{path}"
 
     data = await request.body()
