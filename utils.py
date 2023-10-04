@@ -9,6 +9,7 @@ from typing import Callable, Mapping, MutableMapping, Optional, Tuple, Dict, Lis
 from itertools import groupby, chain
 from collections import OrderedDict, defaultdict
 import os
+import requests
 import sys
 import numpy as np
 from collections import defaultdict
@@ -624,3 +625,23 @@ def is_directory_empty(path):
     if not os.path.isdir(path):
         return True
     return not bool(os.listdir(path))
+
+def download_file(url, filename):
+    """
+    Download a file from a given URL and save it as the specified filename.
+
+    Parameters:
+    - url (str): The URL of the file to be downloaded.
+    - filename (str): The name with which the file should be saved.
+    """
+
+    # Make a GET request to fetch the raw HTML content
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
+
+    with open(filename, 'wb') as file:
+        for chunk in response.iter_content(chunk_size=8192):
+            file.write(chunk)
+
+# Example usage:
+# download_file("https://www.example.com/sample.jpg", "sample.jpg")

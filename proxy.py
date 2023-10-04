@@ -6,6 +6,7 @@ import logging
 from starlette import applications, responses, exceptions
 from starlette.requests import Request
 import config
+import utils
 
 app = applications.Starlette()
 model_config = config.models[config.current_model]
@@ -18,11 +19,12 @@ def start_local_server(model_filename):
     if local_server_process:
         local_server_process.terminate()
         local_server_process.wait()
-    cmd = ["python3", "-m", "llama_cpp.server", "--model", model_filename,
+    cmd = ["python", "-m", "llama_cpp.server", "--model", model_filename,
            "--n_gpu_layers", "1", "--n_ctx", "4096"]  # TODO: set this more correctly
     logging.debug('Running: %s' % ' '.join(cmd))
     local_server_process = subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    return local_server_process
 
 
 @app.route('/set_target', methods=['POST'])
@@ -36,8 +38,9 @@ async def set_target(request: Request):
 
     model_config = config.models[target]
     if config.models[target].get("type") == "local":
-        start_local_server(os.path.join(
-            config.model_folder, config.models[target]['filename']))
+        subp = start_local_server(os.path.join(
+            utils.full_path(config.model_folder), target, config.models[target]['filename']))
+
 
     message = f'Target set to {model_config}'
     return responses.JSONResponse({'message': message}, status_code=200)
@@ -86,4 +89,4 @@ async def server_error(request, exc):
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5001)
+    uvicorn.run(app, host="localhost", port=5001)

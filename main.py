@@ -11,12 +11,11 @@ def download_model(model_name):
     models_download_path = utils.full_path(config.model_folder, create=True)
     model_config = config.models[model_name]
     if model_config['type'] == 'local':
-        model_path = os.path.join(models_download_path, model_name)
+        model_path = utils.full_path(os.path.join(models_download_path, model_name), create=True)
         if utils.is_directory_empty(model_path):
             url = model_config['url']
             print(f"Downloading {model_name} from {url}...")
-            subprocess.run(['curl', '-L', url, '-o', os.path.join(
-                model_path, model_config['filename'])])
+            utils.download_file(url, os.path.join(model_path, model_config['filename']))
         else:
             print(f"Using {model_name} found in {model_path}.")
 
