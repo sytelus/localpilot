@@ -22,8 +22,7 @@ def start_local_server(model_filename):
     cmd = ["python", "-m", "llama_cpp.server", "--model", model_filename,
            "--n_gpu_layers", "1", "--n_ctx", "4096"]  # TODO: set this more correctly
     logging.debug('Running: %s' % ' '.join(cmd))
-    local_server_process = subprocess.Popen(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    local_server_process = subprocess.Popen(cmd)
     return local_server_process
 
 
